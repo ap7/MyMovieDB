@@ -5,8 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import fr.ap7.mymoviedb.model.Movie
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
+import java.util.Locale
 
 class MovieViewModel(private val movieRepository: MovieRepository) : ViewModel() {
 
@@ -27,7 +29,9 @@ class MovieViewModel(private val movieRepository: MovieRepository) : ViewModel()
     fun fetchPopularMovies() {
         disposable.add(movieRepository.fetchMovies()
             .subscribeOn(Schedulers.io())
-            .map { it.results }
+            .flatMap { Observable.fromIterable(it.results) } // transforme les items en observable
+            .map { it.copy(title = it.title.toUpperCase(Locale.getDefault())) } //mappe une liste d emovie dans une autre liste dont les titres sont en majuscule
+            .toList()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 popularMoviesLiveData.postValue(it)
