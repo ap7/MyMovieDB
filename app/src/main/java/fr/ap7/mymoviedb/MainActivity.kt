@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import fr.ap7.mymoviedb.model.Movie
+import java.util.Calendar
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,13 +21,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun openMovieDetails(movie: Movie) {
-        val intent = Intent(this, DetailsActivity::class.java).apply {
-            putExtra(DetailsActivity.EXTRA_MOVIE, movie)
-        }
-        startActivity(intent)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -33,10 +28,6 @@ class MainActivity : AppCompatActivity() {
         val recyclerView: RecyclerView = findViewById(R.id.movie_list)
         recyclerView.adapter = movieAdapter
 
-        getMovies()
-    }
-
-    private fun getMovies() {
         val movieRepository = (application as MovieApplication).movieRepository
 
         val movieViewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
@@ -45,13 +36,30 @@ class MainActivity : AppCompatActivity() {
             }
         }).get(MovieViewModel::class.java)
 
-        movieViewModel.fetchPopularMovies()
-        movieViewModel.popularMovies
-            .observe(this, { popularMovies ->
-                movieAdapter.addMovies(popularMovies)
-            })
+        movieViewModel.popularMovies.observe(this, { popularMovies ->
+            movieAdapter.addMovies(popularMovies
+                // filter function to only include movies released
+                // this year.
+                .filter {
+                    it.release_date.startsWith(
+                        Calendar.getInstance().get(Calendar.YEAR).toString()
+                    )
+                }
+                // sorted by title using Kotlin's sortedBy function.
+                .sortedBy { it.title }
+                // make uppercase the title of movie using map
+                .map { it.copy(title = it.title.toUpperCase(Locale.getDefault())) }
+            )
+        })
         movieViewModel.error.observe(this, { error ->
             Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
         })
+    }
+
+    private fun openMovieDetails(movie: Movie) {
+        val intent = Intent(this, DetailsActivity::class.java).apply {
+            putExtra(DetailsActivity.EXTRA_MOVIE, movie)
+        }
+        startActivity(intent)
     }
 }
