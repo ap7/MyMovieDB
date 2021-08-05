@@ -2,10 +2,15 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-parcelize'
+    id 'kotlin-kapt'
 }
 
 android {
     compileSdkVersion 30
+
+    buildFeatures {
+        dataBinding true
+    }
 
     defaultConfig {
         applicationId "fr.ap7.mymoviedb"
