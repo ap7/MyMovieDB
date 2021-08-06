@@ -2,10 +2,13 @@ package fr.ap7.mymoviedb
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import fr.ap7.mymoviedb.model.Movie
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Calendar
+import java.util.Locale
 
 class MovieViewModel(private val movieRepository: MovieRepository) : ViewModel() {
 
@@ -17,7 +20,27 @@ class MovieViewModel(private val movieRepository: MovieRepository) : ViewModel()
         fetchPopularMovies()
     }
 
-    val popularMovies: LiveData<List<Movie>> get() = movieRepository.movies
+    val popularMovies: LiveData<List<Movie>>
+        get() = movieRepository.movies.map { movies ->
+            // select the movies released last month and sort them by title before
+            // passing them to the UI observer in MainActivity.
+            movies.filter {
+                val cal = Calendar.getInstance()
+                cal.add(Calendar.MONTH, -1)
+                it.release_date.startsWith(
+                    "${cal.get(Calendar.YEAR)}-${
+                        cal.get(Calendar.MONTH)
+                            + 1
+                    }"
+                )
+            }
+            // sorted by title using Kotlin's sortedBy function.
+            movies.sortedBy { it.title }
+            movies.map {
+                // make uppercase the title of movie using map
+                it.copy(title = it.title.toUpperCase(Locale.getDefault()))
+            }
+        }
 
     val error: LiveData<String> get() = movieRepository.error
 
