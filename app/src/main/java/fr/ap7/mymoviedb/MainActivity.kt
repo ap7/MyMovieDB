@@ -8,6 +8,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 import fr.ap7.mymoviedb.databinding.ActivityMainBinding
 import fr.ap7.mymoviedb.model.Movie
 
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity() {
 
         val recyclerView: RecyclerView = findViewById(R.id.movie_list)
         recyclerView.adapter = movieAdapter
+        recyclerView.adapter?.stateRestorationPolicy = PREVENT_WHEN_EMPTY
 
         val movieRepository = (application as MovieApplication).movieRepository
         val movieViewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
