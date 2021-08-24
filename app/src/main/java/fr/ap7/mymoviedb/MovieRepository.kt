@@ -44,4 +44,18 @@ class MovieRepository(
         }
         movieLiveData.postValue(moviesFetched)
     }
+
+    //a suspending function for fetching movies
+    //from the network using the apiKey from The Movie Database, and saving them to the database
+    // function that will be called by the Worker class that will be running to fetch and save the movies.
+    suspend fun fetchMoviesFromNetwork() {
+        val movieDao: MovieDao = movieDatabase.movieDao()
+        try {
+            val popularMovies = movieService.getPopularMovies(apiKey)
+            val moviesFetched = popularMovies.results
+            movieDao.addMovies(moviesFetched)
+        } catch (exception: Exception) {
+            errorLiveData.postValue("An error is occured : ${exception.message}")
+        }
+    }
 }
