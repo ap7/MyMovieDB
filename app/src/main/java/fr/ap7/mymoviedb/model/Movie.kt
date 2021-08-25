@@ -1,13 +1,11 @@
 package fr.ap7.mymoviedb.model
 
 import android.os.Parcelable
-import androidx.room.Entity
 import kotlinx.parcelize.Parcelize
 
 // Representing a movie object from the API
 
 @Parcelize
-@Entity(tableName = "movies", primaryKeys = [("id")])
 data class Movie(
     val adult: Boolean = false,
     val backdrop_path: String = "",
